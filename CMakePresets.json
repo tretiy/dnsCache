@@ -47,5 +47,20 @@
             "name": "buildLinux",
             "configurePreset": "x64-linux-release"
         }
+    ],
+    "workflowPresets": [
+        {
+            "name": "LinuxWorkflow",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "x64-linux-release"
+                },
+                {
+                    "type": "build",
+                    "name": "buildLinux"
+                }
+            ]
+        }
     ]
 }
