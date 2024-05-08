@@ -16,9 +16,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@v1.1
+       
+    - name: Checkout sources
+      uses: actions/checkout@v4
 
-    - name: vcpkg build
+    - name: Prepare dependencies vcpkg
       uses: johnwason/vcpkg-action@v6
       id: vcpkg
       with:
@@ -27,5 +31,5 @@ jobs:
         token: ${{ github.token }}
         github-binarycache: true
           
-    - name: Configure & Build
+    - name: Configure and Build
       run: cmake --workflow --preset LinuxWorkflow
