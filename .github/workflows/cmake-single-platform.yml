@@ -22,13 +22,6 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v4
 
-    - name: Test Env
-      run: |
-            gcc --version 
-            c++ --version 
-            env 
-            ninja --version
-
     - name: Prepare dependencies vcpkg
       uses: johnwason/vcpkg-action@v6
       id: vcpkg
@@ -40,3 +33,10 @@ jobs:
           
     - name: Configure and Build
       run: cmake --workflow --preset LinuxWorkflow
+      
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+          name: dnsCache
+          path: |
+            out/build/x64-linux-release/*dnsCache*
