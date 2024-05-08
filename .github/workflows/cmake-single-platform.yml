@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - name: Setup Ninja
-      uses: ashutoshvarma/setup-ninja@v1.1
+      uses: turtlesec-no/get-ninja@1.1.0
        
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
             gcc --version 
             c++ --version 
             env 
-            ls ninja_bin
+            ninja --version
 
     - name: Prepare dependencies vcpkg
       uses: johnwason/vcpkg-action@v6
