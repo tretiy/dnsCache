@@ -27,7 +27,7 @@ jobs:
             gcc --version 
             c++ --version 
             env 
-            ninja-1.10.0 --version 
+            ninja-bin --version 
 
     - name: Prepare dependencies vcpkg
       uses: johnwason/vcpkg-action@v6
