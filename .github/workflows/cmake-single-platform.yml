@@ -22,6 +22,11 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v4
 
+    - name: Test Env
+      run: gcc --version
+           ninja --version
+           c++ --version
+
     - name: Prepare dependencies vcpkg
       uses: johnwason/vcpkg-action@v6
       id: vcpkg
