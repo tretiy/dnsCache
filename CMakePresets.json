@@ -48,6 +48,12 @@
             "configurePreset": "x64-linux-release"
         }
     ],
+    "testPresets": [
+        {
+            "name": "testLinux",
+            "configurePreset": "x64-linux-release"
+        }
+    ],
     "workflowPresets": [
         {
             "name": "LinuxWorkflow",
@@ -59,6 +65,10 @@
                 {
                     "type": "build",
                     "name": "buildLinux"
+                },
+                {
+                    "type": "test",
+                    "name": "testLinux"
                 }
             ]
         }
