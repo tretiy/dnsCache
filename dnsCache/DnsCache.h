@@ -1,31 +1,34 @@
 #include <mutex>
+#include <shared_mutex>
 #include <unordered_map>
 
-template <class NameT, class IpT>
-struct DLType {
-    DLType(const NameT &name, const IpT &ip) : name(name), ip(ip), prev(nullptr), next(nullptr){};
-    NameT name;
-    IpT ip;
-    DLType *prev;
-    DLType *next;
+template <class NameT, class IpT> struct DLType {
+  DLType(const NameT &name, const IpT &ip)
+      : name(name), ip(ip), prev(nullptr), next(nullptr){};
+  NameT name;
+  IpT ip;
+  DLType *prev;
+  DLType *next;
 };
 
 class DNSCache {
 public:
-    explicit DNSCache(size_t max_size);
-    ~DNSCache();
-    void update(const std::string &name, const std::string &ip);
-    std::string resolve(const std::string &name);
-    typedef DLType<std::string, std::string> iplist_t;
+  explicit DNSCache(size_t max_size);
+  ~DNSCache();
+  void update(const std::string &name, const std::string &ip);
+  std::string resolve(const std::string &name);
+  typedef DLType<std::string, std::string> iplist_t;
+  void printState();
 
 private:
-    const size_t maxSize;
-    iplist_t *ipListHead = nullptr;
-    iplist_t *ipListTail = nullptr;
-    std::unordered_map<std::string, iplist_t *> nameMap;
-    mutable std::mutex dataMutex;
+  const size_t maxSize;
+  iplist_t *ipListHead = nullptr;
+  iplist_t *ipListTail = nullptr;
+  std::unordered_map<std::string, iplist_t *> nameMap;
+  mutable std::shared_mutex mapMutex;
+  mutable std::mutex listMutex;
 
-    void moveToHead(iplist_t *elem);
+  void moveToHead(iplist_t *elem);
 };
 
 /*

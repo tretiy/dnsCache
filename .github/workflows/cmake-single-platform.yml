@@ -26,7 +26,6 @@ jobs:
       uses: johnwason/vcpkg-action@v6
       id: vcpkg
       with:
-        pkgs: gtest fmt spdlog
         triplet: x64-linux
         token: ${{ github.token }}
         github-binarycache: true

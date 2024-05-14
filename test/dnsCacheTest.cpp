@@ -1,33 +1,56 @@
 #include "DnsCache.h"
-#include <gtest/gtest.h>
-#include <thread>
 #include <fmt/core.h>
+#include <gtest/gtest.h>
+#include <limits>
+#include <string>
+#include <thread>
 
-class dnsCacheTest : public testing::Test {
+class CacheSizeAsParamTest : public testing::TestWithParam<size_t> {
 protected:
-    dnsCacheTest() : cache(100)
-    {}
+  CacheSizeAsParamTest() : cache(GetParam()) {}
 
-    DNSCache cache;
+  DNSCache cache;
 };
 
-TEST_F(dnsCacheTest, BasicCheck)
-{
-    EXPECT_EQ(cache.resolve("testItem").size(), 0);
-    for (int i = 0; i < 1000; ++i)
-        cache.update("localhost" + std::to_string(i), "127.0.0." + std::to_string(i));
-    EXPECT_TRUE(cache.resolve("localhost999") == "127.0.0.999");
+TEST_P(CacheSizeAsParamTest, BasicCheck) {
+  EXPECT_EQ(cache.resolve("testItem").size(), 0);
+  auto paramValue = GetParam();
+  for (int i = 0; i < paramValue; ++i) {
+    cache.update("localhost" + std::to_string(i),
+                 "127.0.0." + std::to_string(i));
+  }
+  --paramValue;
+  EXPECT_TRUE(cache.resolve("localhost" + std::to_string(paramValue)) ==
+              "127.0.0." + std::to_string(paramValue));
 }
-auto threadOperation = [](DNSCache &cacheInst, int len, const std::string &nameFmt, const std::string &ipFmt) {
-    for (int i = 0; i < len; ++i) {
-        cacheInst.update(fmt::format(fmt::runtime(nameFmt), i), fmt::format(fmt::runtime(ipFmt), i));
-    }
+auto threadOperation = [](DNSCache &cacheInst, int len,
+                          const std::string &nameFmt,
+                          const std::string &ipFmt) {
+  for (int i = 0; i < len; ++i) {
+    cacheInst.update(fmt::format(fmt::runtime(nameFmt), i),
+                     fmt::format(fmt::runtime(ipFmt), i));
+  }
 };
-TEST_F(dnsCacheTest, ThreadsCheck)
-{
-    std::thread thread1(threadOperation, std::ref(cache), 100, "localhost{}", "127.0.0.{}");
-    std::thread thread2(threadOperation, std::ref(cache), 100, "localhost{}", "127.0.{}.0");
-    thread1.join();
-    thread2.join();
-    EXPECT_TRUE(cache.resolve("localhost999") == "127.0.0.999");
-}
+TEST_P(CacheSizeAsParamTest, FourThreadsUpdate) {
+  auto paramValue = GetParam();
+  std::thread thread1(threadOperation, std::ref(cache), paramValue,
+                      "localhost{}", "127.0.{}.0");
+  std::thread thread2(threadOperation, std::ref(cache), paramValue,
+                      "localhost{}", "127.{}.1.0");
+  std::thread thread3(threadOperation, std::ref(cache), paramValue,
+                      "localhost{}", "127.{}.0.0");
+
+  std::thread thread4(threadOperation, std::ref(cache), 10 * paramValue,
+                      "localhost{}", "127.0.0.{}");
+  thread1.join();
+  thread2.join();
+  thread3.join();
+  thread4.join();
+  EXPECT_TRUE(
+      cache.resolve("localhost" + std::to_string(10 * paramValue - 1)) ==
+      "127.0.0." + std::to_string(10 * paramValue - 1));
+};
+
+INSTANTIATE_TEST_SUITE_P(CacheSizesTests, CacheSizeAsParamTest,
+                         ::testing::Values(1, 100, 1000, 10000, 100000,
+                                           1000000));
