@@ -4,7 +4,7 @@
 - run cmake --workflow --preset "LinuxWorkflow"
 ## Operations complexity
 - Resolve O(1) (search in hash table and update DL list)
-- Update O(1) (insert/serach in hash table and update DL list)
+- Update O(1) (insert/search in hash table and update DL list)
 ## Cache as singleton
 - Use DNSCacheManager to ensure that only one instance od DNSCache exists
 ## Open questions
