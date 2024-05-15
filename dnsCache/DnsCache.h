@@ -1,3 +1,4 @@
+#include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <unordered_map>
@@ -12,13 +13,15 @@ template <class NameT, class IpT> struct DLType {
 };
 
 class DNSCache {
-public:
+private:
   explicit DNSCache(size_t max_size);
+  DNSCache(const DNSCache &other) = delete;
   ~DNSCache();
+
+public:
   void update(const std::string &name, const std::string &ip);
   std::string resolve(const std::string &name);
   typedef DLType<std::string, std::string> iplist_t;
-  void printState();
 
 private:
   const size_t maxSize;
@@ -29,8 +32,20 @@ private:
   mutable std::mutex listMutex;
 
   void moveToHead(iplist_t *elem);
-};
 
+  friend class DNSCacheManager;
+  friend class DNSCacheForTests;
+};
+struct DNSCacheManager {
+  static DNSCache &GetCacheInstance(size_t max_size) {
+    static DNSCache cacheInst(max_size);
+    return cacheInst;
+  }
+};
+struct DNSCacheForTests {
+  DNSCacheForTests(size_t max_size) : cache(max_size){};
+  DNSCache cache;
+};
 /*
 Класс хранит в себе соответствия имя = ip адрес, максимальное число
 записей, которые он может хранить задается в конструкторе через
@@ -47,8 +62,10 @@ max_size.
 Вопросы:
 1. Предложите работающую без ошибок реализацию класса,
 обеспечивающую максимальное быстродействие.
+
 2. Какую сложность обеспечивает предложенное решение при вставке
 записей, при обновлении существующих записей, при поиске записей?
+
 3. Доработайте класс, измените при необходимости его интерфейс, чтобы
 гарантировать существование только одного экземпляра класса в
 процессе.
